@@ -11,6 +11,7 @@ import os
 
 import numpy as np
 import tensorflow as tf
+import better_exchook
 
 from sacred import Experiment
 from rhn import Model
@@ -321,6 +322,8 @@ def evaluate_mc(data_path, dataset, load_model, mc_steps, seed):
 def main(data_path, dataset, seed, _run):
   ex.commands['print_config']()
   np.random.seed(seed)
+  better_exchook.install()
+  better_exchook.replace_traceback_format_tb()
   reader, (train_data, valid_data, test_data, _) = get_data(data_path, dataset)
 
   config = get_config()
