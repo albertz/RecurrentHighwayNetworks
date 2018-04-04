@@ -6,3 +6,4 @@ data/enwik8
 *.pyc
 *.log
 *.pkl
+.history.*
