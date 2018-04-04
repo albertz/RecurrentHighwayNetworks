@@ -50,14 +50,15 @@ class Model(object):
             tf.get_variable_scope().reuse_variables()
           (cell_output, state[l]) = cell(inputs[:, time_step, :], state[l])
           outputs.append(cell_output)
-        inputs = tf.pack(outputs, axis=1)
+        inputs = tf.stack(outputs, axis=1)
         outputs = []
 
     output = tf.reshape(inputs * self._noise_o, [-1, size])
     softmax_w = tf.transpose(embedding) if config.tied else tf.get_variable("softmax_w", [size, vocab_size])
     softmax_b = tf.get_variable("softmax_b", [vocab_size])
     logits = tf.matmul(output, softmax_w) + softmax_b
-    loss = tf.nn.seq2seq.sequence_loss_by_example(
+    from tensorflow.contrib.legacy_seq2seq import sequence_loss_by_example
+    loss = sequence_loss_by_example(
       [logits],
       [tf.reshape(self._targets, [-1])],
       [tf.ones([batch_size * num_steps])])
@@ -226,7 +227,7 @@ def linear(args, output_size, bias, bias_start=None, scope=None):
     if len(args) == 1:
       res = math_ops.matmul(args[0], matrix)
     else:
-      res = math_ops.matmul(array_ops.concat(1, args), matrix)
+      res = math_ops.matmul(array_ops.concat(axis=1, values=args), matrix)
     if not bias:
       return res
     elif bias_start is None:
